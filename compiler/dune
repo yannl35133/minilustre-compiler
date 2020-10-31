@@ -1,0 +1,16 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -50-32-27-39-9-33))))
+
+(executable
+ (modules_without_implementation ast asttypes imp_ast typed_ast)
+ (promote (until-clean))
+ (modes byte)
+ (name minilustre))
+
+
+
+(ocamlyacc parser)
+
+(ocamllex lexer)
