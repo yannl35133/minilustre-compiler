@@ -18,7 +18,7 @@ let new_pat ({ texpr_type= ty; texpr_loc = loc; _ } as e) =
   match ty with
   | [t] ->
       let x = new_local () in
-      let decl = [x,t] in
+      let decl = [x, t] in
       let patt = { tpatt_desc = [x]; tpatt_type = ty; tpatt_loc = loc } in
       let expr = { e with texpr_desc = TE_ident x } in
       decl, patt, expr
@@ -43,7 +43,7 @@ let rec normalize ctx e =
 
   | TE_unop (op, e1) ->
       let ctx, e1' = normalize ctx e1 in
-      ctx, { e with texpr_desc = TE_unop(op,e1') }
+      ctx, { e with texpr_desc = TE_unop (op, e1') }
 
   | TE_binop (op, e1, e2) ->
       let ctx, e1' = normalize ctx e1 in
@@ -94,7 +94,7 @@ let rec normalize ctx e =
 and normalize_list ctx l =
   let ctx, l =
     List.fold_left
-      (fun (ctx,l) e ->
+      (fun (ctx, l) e ->
         let ctx, e' = normalize ctx e in
         ctx, e' :: l
       )
@@ -103,9 +103,9 @@ and normalize_list ctx l =
   in ctx, List.rev l
 
 let normalize_equation node e =
-  let (locals, new_eqs), e' = normalize ([],[]) e.teq_expr in
+  let (locals, new_eqs), e' = normalize ([], []) e.teq_expr in
   { node with
-    tn_local = locals@node.tn_local;
+    tn_local = locals @ node.tn_local;
     tn_equs = { e with teq_expr = e' } :: (List.rev new_eqs) @ node.tn_equs }
 
 let file =
