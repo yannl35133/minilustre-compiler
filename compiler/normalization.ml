@@ -1,5 +1,7 @@
 open Typed_ast
 
+type ctx = typed_var list * t_equation list
+
 let new_local =
   let cpt = ref 0 in fun () -> incr cpt; "aux'" ^ (string_of_int !cpt)
 
@@ -14,7 +16,7 @@ let new_local =
     [patt] est la variable (ou le tuple de variables) vue comme un motif et
     [expr] est la variable (ou le tuple de variables) vue comme une expression.
 *)
-let new_pat ({ texpr_type= ty; texpr_loc = loc; _ } as e) =
+let new_pat ({ texpr_type= ty; texpr_loc = loc; _ } as e) : typed_var list * t_patt * t_expr =
   match ty with
   | [t] ->
       let x = new_local () in
@@ -37,7 +39,7 @@ let new_pat ({ texpr_type= ty; texpr_loc = loc; _ } as e) =
 (** [normalize ctx e] met l'expression [e] en forme normale (en <bexpr>)
     et ajoute à [ctx] les équations introduites lors de la normalisation.
 *)
-let rec normalize ctx e =
+let rec normalize (ctx: ctx) e =
   match e.texpr_desc with
   | TE_const _ | TE_ident _ -> ctx, e
 
@@ -51,7 +53,7 @@ let rec normalize ctx e =
       ctx, { e with texpr_desc = TE_binop (op, e1', e2') }
 
   | TE_app (n, le) ->
-      let (new_vars,new_eqs), le' = normalize_list ctx le in
+      let (new_vars, new_eqs), le' = normalize_list ctx le in
       let x_decl, x_patt, x_expr = new_pat e in
       let x_eq =
         { teq_patt = x_patt;
@@ -59,7 +61,7 @@ let rec normalize ctx e =
       in
       (x_decl @ new_vars, x_eq :: new_eqs), x_expr
 
-  | TE_prim(n, le) ->
+  | TE_prim (n, le) ->
       let (new_vars, new_eqs), le' = normalize_list ctx le in
       let x_decl, x_patt, x_expr = new_pat e in
       let x_eq =
